@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BulletJump")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+afca407f1dc79716a3117842048489a3d8ac90ca")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+05de3f121a5646d6ee79b60d475c99b039b357a8")]
 [assembly: System.Reflection.AssemblyProductAttribute("BulletJump")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BulletJump")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
