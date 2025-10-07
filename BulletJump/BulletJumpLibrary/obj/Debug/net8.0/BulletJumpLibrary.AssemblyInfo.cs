@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("BulletJump")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("BulletJumpLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+afca407f1dc79716a3117842048489a3d8ac90ca")]
-[assembly: System.Reflection.AssemblyProductAttribute("BulletJump")]
-[assembly: System.Reflection.AssemblyTitleAttribute("BulletJump")]
+[assembly: System.Reflection.AssemblyProductAttribute("BulletJumpLibrary")]
+[assembly: System.Reflection.AssemblyTitleAttribute("BulletJumpLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Создано классом WriteCodeFragment MSBuild.
