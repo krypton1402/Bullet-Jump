@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas>
+	<Texture>images/player-atlas</Texture>
+	<Regions>
+		<Region name="player-1" x="29" y="0" width="35" height="72" />
+		<Region name="player-2" x="166" y="0" width="48" height="72" />
+		<Region name="player-3" x="241" y="0" width="45" height="72" />
+	</Regions>
+	<Animations>
+		<Animation name="player-animation" delay="200">
+			<Frame region="player-1" />
+			<Frame region="player-2" />
+		</Animation>
+	</Animations>
+</TextureAtlas>

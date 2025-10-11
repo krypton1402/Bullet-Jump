@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BulletJumpLibrary;
+using BulletJump.Scenes;
 
 namespace BulletJump
 {
@@ -20,6 +21,8 @@ namespace BulletJump
             // TODO: Add your initialization logic here
 
             base.Initialize();
+
+            ChangeScene(new GameScene());
         }
 
         protected override void LoadContent()
