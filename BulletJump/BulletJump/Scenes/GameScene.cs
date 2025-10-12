@@ -56,7 +56,7 @@ namespace BulletJump.Scenes
             TextureAtlas playerAtlas = TextureAtlas.FromFile(Core.Content, "images/player-atlas-definition.xml");
 
             _tilemap = Tilemap.FromFile(Content, "images/enviroment-atlas-definition.xml");
-            _tilemap.Scale = new Vector2(4.0f, 4.0f);
+            _tilemap.Scale = new Vector2(5.0f, 5.0f);
 
             //// Create the tilemap from the XML configuration file.
             //_tilemap = Tilemap.FromFile(Content, "images/tilemap-definition.xml");
@@ -64,7 +64,8 @@ namespace BulletJump.Scenes
 
             // Create the animated player for the player from the atlas.
             AnimatedSprite playerAnimation = playerAtlas.CreateAnimatedSprite("player-animation");
-            playerAnimation.Scale = new Vector2(1.0f, 1.0f);
+
+            playerAnimation.Scale = new Vector2(4.0f, 4.0f);
 
             // Create the slime.
             _player = new Player(playerAnimation);

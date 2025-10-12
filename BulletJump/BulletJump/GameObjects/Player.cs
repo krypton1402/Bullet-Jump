@@ -1,6 +1,7 @@
 ﻿using BulletJumpLibrary;
 using BulletJumpLibrary.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,10 @@ namespace BulletJump.GameObjects
 
         private AnimatedSprite _sprite;
 
+        private Vector2 _playerPosition;
+
+        private const float MOVEMENT_SPEED = 5.0f;
+
         public Player(AnimatedSprite sprite)
         {
             _sprite = sprite;
@@ -27,12 +32,14 @@ namespace BulletJump.GameObjects
         public void Initialize(Vector2 startingPosition, float stride)
         {
             _movementTimer = TimeSpan.Zero;
+            _playerPosition = Vector2.One;
 
         }
 
         private void HandleInput()
         {
-            Vector2 potentialNextDirection = Vector2.Zero;
+            // Vector2 potentialNextDirection = Vector2.Zero;
+            float speed = MOVEMENT_SPEED;
 
             //if (GameController.MoveUp())
             //{
@@ -44,11 +51,11 @@ namespace BulletJump.GameObjects
             //}
             if (GameController.MoveLeft())
             {
-                potentialNextDirection = -Vector2.UnitX;
+                _playerPosition.X -= speed;
             }
             else if (GameController.MoveRight())
             {
-                potentialNextDirection = Vector2.UnitX;
+                _playerPosition.X += speed;
             }
             
 
@@ -56,7 +63,10 @@ namespace BulletJump.GameObjects
 
         public void Update(GameTime gameTime)
         {
-            _sprite.Update(gameTime);
+            if (_sprite != null)
+            {
+                _sprite.Update(gameTime);
+            }
 
             HandleInput();
 
@@ -64,13 +74,15 @@ namespace BulletJump.GameObjects
 
         public void Draw()
         {
-                // Вычислить визуальное положение сегмента в данный момент,
-                // перемещаясь между его позициями "в" и "до" с помощью перемещения
-                // величина смещения lerp
-                Vector2 pos = Vector2.Zero;
-                // Нарисуйте слайм-спрайта в рассчитанном визуальном положении этого сегмента
-                //
-                _sprite.Draw(Core.SpriteBatch, pos);
+            if (!GameController.MoveLeft() && !GameController.MoveRight())
+            {
+                _sprite.Animation.Frames[0].Draw(Core.SpriteBatch, _playerPosition, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 1.0f);
+            }
+            else
+            {
+                _sprite.Draw(Core.SpriteBatch, _playerPosition);
+            }
+                
         }
     }
 }
