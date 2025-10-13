@@ -24,6 +24,10 @@ namespace BulletJump.GameObjects
 
         private const float MOVEMENT_SPEED = 5.0f;
 
+        private bool _wasMoving = false;
+
+        private bool _isMoving = false;
+
         public Player(AnimatedSprite sprite)
         {
             _sprite = sprite;
@@ -34,12 +38,15 @@ namespace BulletJump.GameObjects
             _movementTimer = TimeSpan.Zero;
             _playerPosition = Vector2.One;
 
+            _sprite?.Stop();
         }
 
         private void HandleInput()
         {
             // Vector2 potentialNextDirection = Vector2.Zero;
             float speed = MOVEMENT_SPEED;
+
+            bool isMovingNow = false;
 
             //if (GameController.MoveUp())
             //{
@@ -49,40 +56,55 @@ namespace BulletJump.GameObjects
             //{
             //    potentialNextDirection = Vector2.UnitY;
             //}
+
             if (GameController.MoveLeft())
             {
                 _playerPosition.X -= speed;
+                isMovingNow = true;
+                _sprite.Effects = SpriteEffects.FlipHorizontally;
             }
             else if (GameController.MoveRight())
             {
                 _playerPosition.X += speed;
+                isMovingNow = true;
+                _sprite.Effects = SpriteEffects.None;
             }
-            
+
+            if (isMovingNow && !_wasMoving)
+            {
+                // Начали движение - запускаем анимацию
+                _sprite?.Resume();
+                if (_sprite.CurrentFrameIndex == 0)
+                {
+                    _sprite.SetFrame(1);
+                }
+            }
+            else if (!isMovingNow && _wasMoving)
+            {
+                // Остановились - останавливаем анимацию на первом кадре
+                _sprite?.Stop();
+            }
+
+            _wasMoving = isMovingNow;
+            _isMoving = isMovingNow;
+
+
 
         }
 
         public void Update(GameTime gameTime)
         {
+            HandleInput();
+
             if (_sprite != null)
             {
                 _sprite.Update(gameTime);
             }
-
-            HandleInput();
-
         }
 
         public void Draw()
         {
-            if (!GameController.MoveLeft() && !GameController.MoveRight())
-            {
-                _sprite.Animation.Frames[0].Draw(Core.SpriteBatch, _playerPosition, Color.White, 0.0f, Vector2.Zero, 4.0f, SpriteEffects.None, 1.0f);
-            }
-            else
-            {
-                _sprite.Draw(Core.SpriteBatch, _playerPosition);
-            }
-                
+                _sprite.Draw(Core.SpriteBatch, _playerPosition);              
         }
     }
 }

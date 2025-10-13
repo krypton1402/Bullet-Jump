@@ -26,6 +26,8 @@ namespace BulletJump.Scenes
 
         private Player _player;
 
+        private Sprite _stayPlayer;
+
         private Tilemap _tilemap;
 
         public override void Initialize()
