@@ -2,14 +2,48 @@
 <TextureAtlas>
 	<Texture>images/player-atlas</Texture>
 	<Regions>
-		<Region name="player-1" x="29" y="0" width="35" height="72" />
-		<Region name="player-2" x="166" y="0" width="48" height="72" />
-		<Region name="player-3" x="241" y="0" width="45" height="72" />
+		<Region name="player-1" x="29" y="23" width="35" height="41" />
+		<Region name="player-2" x="165" y="23" width="42" height="41" />
+		<Region name="player-3" x="240" y="23" width="42" height="41" />
+		<Region name="player-4" x="319" y="23" width="42" height="41" />
+		<Region name="player-5" x="390" y="23" width="42" height="41" />
+		<Region name="player-6" x="454" y="23" width="42" height="41" />
+		<Region name="player-7" x="527" y="23" width="42" height="41" />
+		<Region name="player-8" x="607" y="23" width="42" height="41" />
+		<Region name="player-9" x="677" y="23" width="42" height="41" />
+		
+		<Region name="player-jump-1" x="1904" y="19" width="20" height="21" />
+		<Region name="player-jump-2" x="1975" y="19" width="20" height="21" />
+		<Region name="player-jump-3" x="2047" y="19" width="20" height="21" />
+		<Region name="player-jump-4" x="2122" y="19" width="20" height="21" />
+		<Region name="player-jump-5" x="2192" y="19" width="20" height="21" />
+		<Region name="player-jump-6" x="2262" y="19" width="20" height="21" />
+		<Region name="player-jump-7" x="2335" y="19" width="20" height="21" />
+		<Region name="player-jump-8" x="2409" y="19" width="20" height="21" />
+		<Region name="player-jump-9" x="2482" y="25" width="36" height="39" />
 	</Regions>
 	<Animations>
-		<Animation name="player-animation" delay="200">
+		<Animation name="player-animation" delay="100">
 			<Frame region="player-1" />
 			<Frame region="player-2" />
+			<Frame region="player-3" />
+			<Frame region="player-4" />
+			<Frame region="player-5" />
+			<Frame region="player-6" />
+			<Frame region="player-7" />
+			<Frame region="player-8" />
+			<Frame region="player-9" />
+		</Animation>
+		<Animation name="player-jump-animation" delay="100">
+			<Frame region="player-jump-1" />
+			<Frame region="player-jump-2" />
+			<Frame region="player-jump-3" />
+			<Frame region="player-jump-4" />
+			<Frame region="player-jump-5" />
+			<Frame region="player-jump-6" />
+			<Frame region="player-jump-7" />
+			<Frame region="player-jump-8" />
+			<Frame region="player-jump-9" />
 		</Animation>
 	</Animations>
 </TextureAtlas>
