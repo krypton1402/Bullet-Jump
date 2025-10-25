@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tilemap>
     <Tileset region="0 0 272 224" tileWidth="16" tileHeight="16">images/enviroment-atlas</Tileset>
+	<Layers>
+		<Layer name="Ground">
     <Tiles>
         112 113 114 115 112 113 114 115 112 113 114 115 112 113 114 115 
 		60 46 59 59 59 59 124 124 59 59 59 59 59 99 100 60 
@@ -12,4 +14,6 @@
 		60 29 59 59 59 59 59 59 59 59 59 59 59 59 59 60 
 		77 29 76 76 76 76 76 76 76 76 76 76 76 76 76 77
     </Tiles>
+		</Layer>
+	</Layers>
 </Tilemap>
