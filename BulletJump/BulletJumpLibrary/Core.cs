@@ -207,5 +207,49 @@ namespace BulletJumpLibrary
                 s_activeScene.Initialize();
             }
         }
+
+        /// <summary>
+        /// Конвертирует мировые координаты в координаты тайлов
+        /// </summary>
+        /// <param name="worldPosition">Мировые координаты</param>
+        /// <param name="tileWidth">Ширина тайла</param>
+        /// <param name="tileHeight">Высота тайла</param>
+        /// <returns>Координаты тайла</returns>
+        public static Point WorldToTile(Vector2 worldPosition, float tileWidth, float tileHeight)
+        {
+            return new Point(
+                (int)(worldPosition.X / tileWidth),
+                (int)(worldPosition.Y / tileHeight)
+            );
+        }
+
+        /// <summary>
+        /// Конвертирует координаты тайлов в мировые координаты
+        /// </summary>
+        /// <param name="tilePosition">Координаты тайла</param>
+        /// <param name="tileWidth">Ширина тайла</param>
+        /// <param name="tileHeight">Высота тайла</param>
+        /// <returns>Мировые координаты</returns>
+        public static Vector2 TileToWorld(Point tilePosition, float tileWidth, float tileHeight)
+        {
+            return new Vector2(
+                tilePosition.X * tileWidth,
+                tilePosition.Y * tileHeight
+            );
+        }
+
+        /// <summary>
+        /// Проверяет, находится ли точка внутри границ тайлмапа
+        /// </summary>
+        /// <param name="tilePosition">Позиция тайла</param>
+        /// <param name="tilemapColumns">Количество колонок в тайлмапе</param>
+        /// <param name="tilemapRows">Количество строк в тайлмапе</param>
+        /// <returns>True если точка внутри границ</returns>
+        public static bool IsInTilemapBounds(Point tilePosition, int tilemapColumns, int tilemapRows)
+        {
+            return tilePosition.X >= 0 && tilePosition.X < tilemapColumns &&
+                   tilePosition.Y >= 0 && tilePosition.Y < tilemapRows;
+        }
     }
 }
+

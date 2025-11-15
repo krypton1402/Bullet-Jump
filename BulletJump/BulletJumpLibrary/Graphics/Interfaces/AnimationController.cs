@@ -23,6 +23,7 @@ namespace BulletJumpLibrary.Graphics.Interfaces
         public void Play() => _sprite.Play();
         public void Stop() => _sprite.Stop();
         public void Resume() => _sprite.Resume();
+        public void SetFrame(int frameIndex) => _sprite.SetFrame(frameIndex);
 
         // Реализуем свойства для размеров
         public float Width => _sprite.Width;
@@ -32,7 +33,6 @@ namespace BulletJumpLibrary.Graphics.Interfaces
 
         public bool IsPlaying => !_sprite.IsPaused;
 
-        // Новый метод: запускает анимацию сразу со второго кадра
         public void PlayImmediate()
         {
             _sprite.Play(); // Сбрасываем на первый кадр
