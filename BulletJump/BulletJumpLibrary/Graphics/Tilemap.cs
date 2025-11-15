@@ -109,7 +109,7 @@ namespace BulletJumpLibrary.Graphics
                 int tilesetIndex = layer.GetTileID(i);
                 if (tilesetIndex == 0) continue; // Skip empty tiles
 
-                TextureRegion tile = _tileset.GetTile(tilesetIndex);
+                TextureRegion tile = _tileset.GetTile(tilesetIndex - 1);
 
                 int x = i % Columns;
                 int y = i / Columns;

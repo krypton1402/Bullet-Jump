@@ -43,7 +43,7 @@
 			<Frame region="player-jump-6" />
 			<Frame region="player-jump-7" />
 			<Frame region="player-jump-8" />
-			<Frame region="player-jump-9" />
+			
 		</Animation>
 	</Animations>
 </TextureAtlas>

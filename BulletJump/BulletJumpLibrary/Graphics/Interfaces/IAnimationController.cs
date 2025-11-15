@@ -17,6 +17,7 @@ namespace BulletJumpLibrary.Graphics.Interfaces
         void Stop();
         void Resume();
         void PlayImmediate();
+        void SetFrame(int frameIndex); // Добавьте этот метод
 
         // Добавляем методы для получения размеров
         float Width { get; }

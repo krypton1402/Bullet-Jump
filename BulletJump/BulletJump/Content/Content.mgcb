@@ -28,6 +28,9 @@
 /processorParam:TextureFormat=Color
 /build:images/enviroment-atlas.png
 
+#begin images/level1-enviroment-atlas-definition.xml
+/copy:images/level1-enviroment-atlas-definition.xml
+
 #begin images/player-atlas-definition.xml
 /copy:images/player-atlas-definition.xml
 

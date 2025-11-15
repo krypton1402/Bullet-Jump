@@ -45,11 +45,11 @@ namespace BulletJump.Scenes
                 Vector2 playerPos = new Vector2();
 
                 // Позиция на последнем тайле в левом нижнем углу
-                int tileX = 3;
-                int tileY = _tilemap.Rows - 1;
+                int tileX = 7;
+                int tileY = _tilemap.Rows - 10;
 
                 playerPos.X = tileX * _tilemap.TileWidth + (_tilemap.TileWidth - _player.GetBounds().Width) / 2;
-                playerPos.Y = tileY * _tilemap.TileHeight - _player.GetBounds().Height + _tilemap.TileHeight - 36;
+                playerPos.Y = tileY * _tilemap.TileHeight - _player.GetBounds().Height + _tilemap.TileHeight;
 
                 _player.Initialize(playerPos, 300);
 
@@ -68,30 +68,12 @@ namespace BulletJump.Scenes
             }
         }
 
-        private Point FindSafeSpawnPosition()
-        {
-            // Ищем первую безопасную позицию на слое Ground
-            for (int y = 0; y < _tilemap.Rows; y++)
-            {
-                for (int x = 0; x < _tilemap.Columns; x++)
-                {
-                    if (!_tilemap.IsTileEmpty("Ground", x, y) &&
-                        _tilemap.IsTileEmpty("Collision", x, y))
-                    {
-                        return new Point(x, y);
-                    }
-                }
-            }
-
-            return new Point(_tilemap.Columns / 2, _tilemap.Rows / 2);
-        }
-
         public override void LoadContent()
         {
             try
             {
                 // Загружаем тайлмап
-                _tilemap = Tilemap.FromFile(Content, "images/enviroment-atlas-definition.xml");
+                _tilemap = Tilemap.FromFile(Content, "images/level1-enviroment-atlas-definition.xml");
                 _tilemap.Scale = new Vector2(5.0f, 5.0f);
 
                 // Настраиваем видимость слоев
@@ -108,6 +90,10 @@ namespace BulletJump.Scenes
 
                 playerWalkAnimation.Scale = new Vector2(4.0f, 4.0f);
                 playerJumpAnimation.Scale = new Vector2(4.0f, 4.0f);
+
+                // УСТАНАВЛИВАЕМ ORIGIN В ЦЕНТРЕ ДЛЯ ОБЕИХ АНИМАЦИЙ
+                playerWalkAnimation.CenterOrigin();
+                playerJumpAnimation.CenterOrigin();
 
                 IAnimationController walkAnimation = new AnimationController(playerWalkAnimation);
                 IAnimationController jumpAnimation = new AnimationController(playerJumpAnimation);
@@ -127,16 +113,18 @@ namespace BulletJump.Scenes
         {
             if (_currentState == GameState.Playing && _isInitialized)
             {
+                // 1. Сначала обновляем игрока (ввод, физика, анимация)
                 _player.Update(gameTime);
 
-                // Обновляем цель камеры - позицию игрока
+                // 2. Обрабатываем коллизии
+                HandleCollisions();
+
+                // 3. Обновляем камеру
                 if (_camera != null)
                 {
                     _camera.Target = _player.GetPosition();
                     _camera.Update(gameTime);
                 }
-
-                HandleCollisions();
             }
         }
 
@@ -147,11 +135,10 @@ namespace BulletJump.Scenes
             Rectangle playerBounds = _player.GetBounds();
             Point playerTile = Core.WorldToTile(_player.GetPosition(), _tilemap.TileWidth, _tilemap.TileHeight);
 
-            CheckTileCollision(playerBounds, playerTile);
-        }
+            bool wasGroundedThisFrame = false;
+            bool hadAnyCollision = false;
 
-        private void CheckTileCollision(Rectangle playerBounds, Point playerTile)
-        {
+            // Проверяем коллизии со всеми окружающими тайлами
             for (int x = -1; x <= 1; x++)
             {
                 for (int y = -1; y <= 1; y++)
@@ -162,14 +149,76 @@ namespace BulletJump.Scenes
                     {
                         if (!_tilemap.IsTileEmpty("Collision", checkTile.X, checkTile.Y))
                         {
-                            HandleTileCollision(playerBounds, checkTile);
+                            hadAnyCollision = true;
+                            if (HandleTileCollision(playerBounds, checkTile))
+                            {
+                                wasGroundedThisFrame = true;
+                            }
                         }
                     }
                 }
             }
+
+            // Если не было обычных коллизий с землей, но игрок движется вниз - проверяем землю под ногами
+            if (!wasGroundedThisFrame && _player.Velocity.Y >= 0)
+            {
+                wasGroundedThisFrame = CheckGroundBelow();
+            }
+
+            // Стабильно устанавливаем состояние grounded
+            _player.SetGrounded(wasGroundedThisFrame);
         }
 
-        private void HandleTileCollision(Rectangle playerBounds, Point collisionTile)
+        private bool CheckGroundBelow()
+        {
+            Rectangle bounds = _player.GetBounds();
+
+            // Проверяем несколько точек под ногами для большей стабильности
+            Vector2[] checkPoints = {
+        new Vector2(bounds.Left + 5, bounds.Bottom + 2),
+        new Vector2(bounds.Center.X, bounds.Bottom + 2),
+        new Vector2(bounds.Right - 5, bounds.Bottom + 2)
+    };
+
+            bool foundGround = false;
+
+            foreach (Vector2 checkPoint in checkPoints)
+            {
+                Point tileBelow = Core.WorldToTile(checkPoint, _tilemap.TileWidth, _tilemap.TileHeight);
+
+                if (Core.IsInTilemapBounds(tileBelow, _tilemap.Columns, _tilemap.Rows))
+                {
+                    if (!_tilemap.IsTileEmpty("Collision", tileBelow.X, tileBelow.Y))
+                    {
+                        foundGround = true;
+
+                        // Корректируем позицию только если действительно нужно
+                        if (ShouldCorrectPosition(tileBelow))
+                        {
+                            Vector2 tileWorldPos = Core.TileToWorld(tileBelow, _tilemap.TileWidth, _tilemap.TileHeight);
+                            float groundY = tileWorldPos.Y - _player.GetColliderSize().Y - _player.GetColliderOffset().Y;
+                            _player.SetPosition(new Vector2(_player.GetPosition().X, groundY));
+                        }
+                        break; // Достаточно найти один тайл земли
+                    }
+                }
+            }
+
+            return foundGround;
+        }
+
+        private bool ShouldCorrectPosition(Point tileBelow)
+        {
+            // Корректируем позицию только если игрок действительно падает на платформу
+            Rectangle bounds = _player.GetBounds();
+            Vector2 tileWorldPos = Core.TileToWorld(tileBelow, _tilemap.TileWidth, _tilemap.TileHeight);
+            float distanceToGround = tileWorldPos.Y - bounds.Bottom;
+
+            // Корректируем только если расстояние небольшое (игрок близко к земле)
+            return distanceToGround >= 0 && distanceToGround < 10f;
+        }
+
+        private bool HandleTileCollision(Rectangle playerBounds, Point collisionTile)
         {
             Vector2 tileWorldPos = Core.TileToWorld(collisionTile, _tilemap.TileWidth, _tilemap.TileHeight);
             Rectangle tileBounds = new Rectangle(
@@ -179,49 +228,82 @@ namespace BulletJump.Scenes
                 (int)_tilemap.TileHeight
             );
 
-            if (playerBounds.Intersects(tileBounds))
+            if (!playerBounds.Intersects(tileBounds))
+                return false;
+
+            Vector2 correction = CalculateCollisionCorrection(playerBounds, tileBounds);
+
+            // Применяем коррекцию позиции игрока
+            Vector2 newPosition = _player.GetPosition() + correction;
+            _player.SetPosition(newPosition);
+
+            // Определяем тип столкновения
+            if (correction.Y < 0) // Столкновение сверху (игрок стоит на тайле)
             {
-                Vector2 correction = CalculateCollisionCorrection(playerBounds, tileBounds);
-                _player.SetPosition(_player.GetPosition() + correction);
+                _player.SetVerticalVelocity(0);
+                return true; // Это коллизия с землей
             }
+            else if (correction.Y > 0) // Столкновение снизу (удар головой)
+            {
+                _player.SetVerticalVelocity(0);
+            }
+
+            return false;
         }
+
 
         private Vector2 CalculateCollisionCorrection(Rectangle player, Rectangle tile)
         {
             Vector2 correction = Vector2.Zero;
 
+            // Рассчитываем глубину проникновения с каждой стороны
             float overlapLeft = player.Right - tile.Left;
             float overlapRight = tile.Right - player.Left;
             float overlapTop = player.Bottom - tile.Top;
             float overlapBottom = tile.Bottom - player.Top;
 
-            float minOverlap = Math.Min(Math.Min(overlapLeft, overlapRight), Math.Min(overlapTop, overlapBottom));
+            // Находим минимальное перекрытие
+            float minOverlap = float.MaxValue;
+            Vector2 minCorrection = Vector2.Zero;
 
-            if (minOverlap == overlapLeft)
-                correction.X = -overlapLeft;
-            else if (minOverlap == overlapRight)
-                correction.X = overlapRight;
-            else if (minOverlap == overlapTop)
-                correction.Y = -overlapTop;
-            else if (minOverlap == overlapBottom)
-                correction.Y = overlapBottom;
+            if (overlapLeft > 0 && overlapLeft < minOverlap)
+            {
+                minOverlap = overlapLeft;
+                minCorrection = new Vector2(-overlapLeft, 0);
+            }
 
-            return correction;
+            if (overlapRight > 0 && overlapRight < minOverlap)
+            {
+                minOverlap = overlapRight;
+                minCorrection = new Vector2(overlapRight, 0);
+            }
+
+            if (overlapTop > 0 && overlapTop < minOverlap)
+            {
+                minOverlap = overlapTop;
+                minCorrection = new Vector2(0, -overlapTop);
+            }
+
+            if (overlapBottom > 0 && overlapBottom < minOverlap)
+            {
+                minOverlap = overlapBottom;
+                minCorrection = new Vector2(0, overlapBottom);
+            }
+
+            return minCorrection;
         }
 
         public override void Draw(GameTime gameTime)
         {
-            Core.GraphicsDevice.Clear(Color.Black);
+            Core.GraphicsDevice.Clear(Color.CornflowerBlue);
 
             if (!_isInitialized || _camera == null)
             {
-                // Если камера не готова, рисуем без трансформации
                 Core.SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
                 Core.SpriteBatch.End();
                 return;
             }
 
-            // Используем матрицу трансформации камеры
             Core.SpriteBatch.Begin(
                 samplerState: SamplerState.PointClamp,
                 transformMatrix: _camera.GetTransformMatrix()

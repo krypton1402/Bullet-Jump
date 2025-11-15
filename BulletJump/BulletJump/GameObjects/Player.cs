@@ -5,10 +5,6 @@ using BulletJumpLibrary.Graphics.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BulletJump.GameObjects
 {
@@ -26,13 +22,19 @@ namespace BulletJump.GameObjects
         private PlayerAnimationState _animationState;
         private bool _isMoving;
         private bool _isGrounded;
+        private bool _wasGrounded; // Для отслеживания предыдущего состояния
         private SpriteEffects _spriteEffects;
 
-        //Физика
+        // Физика
         private const float MOVEMENT_SPEED = 5.0f;
-        private const float JUMP_FORCE = -12.0f; // Отрицательное значение - прыжок вверх
+        private const float JUMP_FORCE = -12.0f;
         private const float GRAVITY = 0.5f;
-        private float _groundLevel;     
+        private const float MAX_FALL_SPEED = 10.0f;
+
+        // Коллайдер
+        private const int COLLIDER_WIDTH = 42 * 4;
+        private const int COLLIDER_HEIGHT = 41 * 4;
+        private readonly Rectangle _collider;
 
         public Player(IAnimationController walkAnimation, IAnimationController jumpAnimation)
         {
@@ -40,6 +42,9 @@ namespace BulletJump.GameObjects
             _jumpAnimation = jumpAnimation ?? throw new ArgumentNullException(nameof(jumpAnimation));
             _currentAnimation = _walkAnimation;
             _animationState = PlayerAnimationState.Idle;
+
+            // Коллайдер центрирован относительно позиции спрайта
+            _collider = new Rectangle(-COLLIDER_WIDTH / 2, -COLLIDER_HEIGHT / 2, COLLIDER_WIDTH, COLLIDER_HEIGHT);
 
             InitializeAnimations();
         }
@@ -55,7 +60,7 @@ namespace BulletJump.GameObjects
             _playerPosition = startingPosition;
             _velocity = Vector2.Zero;
             _isGrounded = true;
-            _groundLevel = _playerPosition.Y;
+            _wasGrounded = true;
             _spriteEffects = SpriteEffects.None;
 
             SetAnimationState(PlayerAnimationState.Idle);
@@ -63,112 +68,67 @@ namespace BulletJump.GameObjects
 
         public Rectangle GetBounds()
         {
-            if (_currentAnimation == null)
-                return Rectangle.Empty;
-
-            Vector2 position = _playerPosition;
-            Vector2 origin = _currentAnimation.Origin;
-            Vector2 scale = _currentAnimation.Scale;
-
-            float width = _currentAnimation.Width;
-            float height = _currentAnimation.Height;
-
-            // Вычисляем фактическую позицию с учетом origin
-            float x = position.X - origin.X * scale.X;
-            float y = position.Y - origin.Y * scale.Y;
-
-            return new Rectangle((int)x, (int)y, (int)width, (int)height);
-        }
-
-        // Для отладки - визуализация bounds
-        public void DrawDebug(SpriteBatch spriteBatch)
-        {
-            Rectangle bounds = GetBounds();
-
-            // Рисуем красную рамку вокруг bounds
-            Texture2D pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-            pixel.SetData(new[] { Color.Red });
-
-            // Верхняя линия
-            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, 1), Color.Red);
-            // Нижняя линия
-            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y + bounds.Height, bounds.Width, 1), Color.Red);
-            // Левая линия
-            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, 1, bounds.Height), Color.Red);
-            // Правая линия
-            spriteBatch.Draw(pixel, new Rectangle(bounds.X + bounds.Width, bounds.Y, 1, bounds.Height), Color.Red);
+            return new Rectangle(
+                (int)(_playerPosition.X + _collider.X),
+                (int)(_playerPosition.Y + _collider.Y),
+                _collider.Width,
+                _collider.Height
+            );
         }
 
         private void HandleInput()
         {
-            float speed = MOVEMENT_SPEED;
+            _velocity.X = 0;
             bool isMovingNow = false;
 
             if (GameController.MoveLeft())
             {
-                _playerPosition.X -= speed;
+                _velocity.X = -MOVEMENT_SPEED;
                 isMovingNow = true;
                 _spriteEffects = SpriteEffects.FlipHorizontally;
             }
             else if (GameController.MoveRight())
             {
-                _playerPosition.X += speed;
+                _velocity.X = MOVEMENT_SPEED;
                 isMovingNow = true;
                 _spriteEffects = SpriteEffects.None;
             }
 
-            if (GameController.MoveUp())
+            if (GameController.MoveUp() && _isGrounded)
             {
                 Jump();
             }
 
-            // Обновляем состояние движения и анимации
             _isMoving = isMovingNow;
-            UpdateAnimationState();
-
             _currentAnimation.SetEffects(_spriteEffects);
         }
 
         private void UpdateAnimationState()
         {
-            PlayerAnimationState newState;
-
-            if (!_isGrounded)
-            {
-                newState = PlayerAnimationState.Jumping;
-            }
-            else if (_isMoving)
-            {
-                newState = PlayerAnimationState.Walking;
-            }
-            else
-            {
-                newState = PlayerAnimationState.Idle;
-            }
+            PlayerAnimationState newState = DetermineAnimationState();
 
             // Переключаем состояние только если оно изменилось
             if (newState != _animationState)
             {
                 SetAnimationState(newState);
             }
-            // Если продолжаем движение, убеждаемся что анимация воспроизводится
-            else if (newState == PlayerAnimationState.Walking)
-            {
-                var animationController = _currentAnimation as AnimationController;
-                if (animationController != null && !animationController.IsPlaying)
-                {
-                    // Используем немедленный запуск для избежания задержки
-                    _currentAnimation.PlayImmediate();
-                }
-            }
+        }
+
+        private PlayerAnimationState DetermineAnimationState()
+        {
+            if (!_isGrounded)
+                return PlayerAnimationState.Jumping;
+
+            return _isMoving ? PlayerAnimationState.Walking : PlayerAnimationState.Idle;
         }
 
         private void SetAnimationState(PlayerAnimationState newState)
         {
-            // Останавливаем предыдущую анимацию
+            if (newState == _animationState)
+                return;
+
             _currentAnimation.Stop();
 
-            // Выбираем новую анимацию
             _currentAnimation = newState switch
             {
                 PlayerAnimationState.Jumping => _jumpAnimation,
@@ -180,15 +140,12 @@ namespace BulletJump.GameObjects
             switch (newState)
             {
                 case PlayerAnimationState.Walking:
-                    // Используем немедленный запуск для ходьбы
                     _currentAnimation.PlayImmediate();
                     break;
                 case PlayerAnimationState.Jumping:
-                    // Для прыжка можно использовать обычный запуск
                     _currentAnimation.Play();
                     break;
                 case PlayerAnimationState.Idle:
-                    // Для Idle останавливаем на первом кадре
                     _currentAnimation.Stop();
                     break;
             }
@@ -205,78 +162,84 @@ namespace BulletJump.GameObjects
             }
         }
 
-        private void ApplyPhysics()
+        public void ApplyPhysics()
         {
-            // Применяем гравитацию
+            // Применяем гравитацию только если не на земле
             if (!_isGrounded)
             {
                 _velocity.Y += GRAVITY;
+                _velocity.Y = Math.Min(_velocity.Y, MAX_FALL_SPEED);
             }
-
-            // Обновляем позицию
-            _playerPosition += _velocity;
-
-            // Проверка приземления
-            if (_playerPosition.Y >= _groundLevel)
+            else
             {
-                _playerPosition.Y = _groundLevel;
                 _velocity.Y = 0;
-                _isGrounded = true;
-
-                // Если не двигаемся, останавливаем анимацию при приземлении
-                if (!_isMoving)
-                {
-                    _currentAnimation?.Stop();
-                }
             }
+
+            _playerPosition += _velocity;
         }
 
         public void Update(GameTime gameTime)
         {
             HandleInput();
             ApplyPhysics();
-
+            UpdateAnimationState();
             _currentAnimation.Update(gameTime);
+
+            _wasGrounded = _isGrounded; // Сохраняем состояние для следующего кадра
         }
 
         public void Draw()
         {
-                _currentAnimation.Draw(Core.SpriteBatch, _playerPosition);
-            //DrawDebug(Core.SpriteBatch);
+            _currentAnimation.Draw(Core.SpriteBatch, _playerPosition);
+            // DrawDebug(Core.SpriteBatch); // Раскомментируйте для отладки
         }
 
-        public void StayInRoom()
-        {
-
-        }
-
-        // Для проверки столкновений
-        public bool Intersects(Rectangle otherBounds)
-        {
-            return GetBounds().Intersects(otherBounds);
-        }
-
-        public bool Intersects(Player otherPlayer)
-        {
-            return GetBounds().Intersects(otherPlayer.GetBounds());
-        }
-
-        // Метод для получения текущей позиции
-        public Vector2 GetPosition()
-        {
-            return _playerPosition;
-        }
-
-        // Метод для установки позиции
-        public void SetPosition(Vector2 newPosition)
-        {
-            _playerPosition = newPosition;
-        }
-
-        // Свойства для доступа к состоянию
+        public Vector2 GetPosition() => _playerPosition;
+        public void SetPosition(Vector2 newPosition) => _playerPosition = newPosition;
         public bool IsGrounded => _isGrounded;
-        public bool IsJumping => !_isGrounded;
+        public bool WasGrounded => _wasGrounded; // Новое свойство
         public Vector2 Velocity => _velocity;
         public PlayerAnimationState AnimationState => _animationState;
+        public Vector2 GetColliderOffset() => new Vector2(_collider.X, _collider.Y);
+        public Vector2 GetColliderSize() => new Vector2(_collider.Width, _collider.Height);
+
+        public void SetGrounded(bool grounded)
+        {
+            // Защита от быстрых переключений - только если состояние действительно изменилось
+            if (_isGrounded != grounded)
+            {
+                _isGrounded = grounded;
+
+                if (grounded)
+                {
+                    _velocity.Y = 0;
+                }
+            }
+        }
+
+        public void SetVerticalVelocity(float velocityY) => _velocity.Y = velocityY;
+
+        // Отладочная отрисовка
+        public void DrawDebug(SpriteBatch spriteBatch)
+        {
+            Rectangle bounds = GetBounds();
+
+            Texture2D pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            pixel.SetData(new[] { Color.Red });
+
+            // Рисуем коллайдер
+            Texture2D colliderTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            colliderTexture.SetData(new[] { Color.Red * 0.3f });
+            spriteBatch.Draw(colliderTexture, bounds, Color.Red * 0.3f);
+
+            // Рисуем контур коллайдера
+            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, 1), Color.Red);
+            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Bottom - 1, bounds.Width, 1), Color.Red);
+            spriteBatch.Draw(pixel, new Rectangle(bounds.X, bounds.Y, 1, bounds.Height), Color.Red);
+            spriteBatch.Draw(pixel, new Rectangle(bounds.Right - 1, bounds.Y, 1, bounds.Height), Color.Red);
+
+            pixel.Dispose();
+            colliderTexture.Dispose();
+        }
     }
 }
