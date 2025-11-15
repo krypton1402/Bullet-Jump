@@ -87,6 +87,8 @@ namespace BulletJump.Scenes
 
                 AnimatedSprite playerWalkAnimation = playerAtlas.CreateAnimatedSprite("player-animation");
                 AnimatedSprite playerJumpAnimation = playerAtlas.CreateAnimatedSprite("player-jump-animation");
+                Sprite bullet = playerAtlas.CreateSprite("bullet-1");
+                bullet.Scale = new Vector2(4.0f, 4.0f);
 
                 playerWalkAnimation.Scale = new Vector2(4.0f, 4.0f);
                 playerJumpAnimation.Scale = new Vector2(4.0f, 4.0f);
@@ -99,6 +101,7 @@ namespace BulletJump.Scenes
                 IAnimationController jumpAnimation = new AnimationController(playerJumpAnimation);
 
                 _player = new Player(walkAnimation, jumpAnimation);
+                _player.bulletTexture = bullet;
 
                 // Инициализируем игру ПОСЛЕ загрузки всего контента
                 InitializeNewGame();

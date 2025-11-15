@@ -21,6 +21,11 @@
 		<Region name="player-jump-7" x="2335" y="19" width="20" height="21" />
 		<Region name="player-jump-8" x="2409" y="19" width="20" height="21" />
 		<Region name="player-jump-9" x="2482" y="25" width="36" height="39" />
+		
+		<Region name="shot-1" x="2901" y="48" width="21" height="15" />
+		<Region name="shot-2" x="2935" y="48" width="21" height="12" />
+		
+		<Region name="bullet-1" x="2966" y="54" width="8" height="4" />
 	</Regions>
 	<Animations>
 		<Animation name="player-animation" delay="100">

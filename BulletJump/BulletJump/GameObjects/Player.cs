@@ -5,6 +5,7 @@ using BulletJumpLibrary.Graphics.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 
 namespace BulletJump.GameObjects
 {
@@ -23,6 +24,7 @@ namespace BulletJump.GameObjects
         private bool _isMoving;
         private bool _isGrounded;
         private bool _wasGrounded; // Для отслеживания предыдущего состояния
+        private bool _isShooting;
         private SpriteEffects _spriteEffects;
 
         // Физика
@@ -35,6 +37,11 @@ namespace BulletJump.GameObjects
         private const int COLLIDER_WIDTH = 42 * 4;
         private const int COLLIDER_HEIGHT = 41 * 4;
         private readonly Rectangle _collider;
+
+        // Стрельба
+        private List<Bullet> _bullets = new List<Bullet>();
+
+        public Sprite bulletTexture;
 
         public Player(IAnimationController walkAnimation, IAnimationController jumpAnimation)
         {
@@ -97,6 +104,11 @@ namespace BulletJump.GameObjects
             if (GameController.MoveUp() && _isGrounded)
             {
                 Jump();
+            }
+
+            if (GameController.Shot() && _isGrounded)
+            {
+                Shot();
             }
 
             _isMoving = isMovingNow;
@@ -162,6 +174,18 @@ namespace BulletJump.GameObjects
             }
         }
 
+        private void Shot()
+        {
+            if (_bullets != null)
+            {
+                _bullets.Add(new Bullet(bulletTexture, _playerPosition, new Vector2(4.0f)));
+            }
+            else
+            {
+                _bullets.Add(new Bullet(bulletTexture, _playerPosition, new Vector2(4.0f)));
+            }
+        }
+
         public void ApplyPhysics()
         {
             // Применяем гравитацию только если не на земле
@@ -184,6 +208,10 @@ namespace BulletJump.GameObjects
             ApplyPhysics();
             UpdateAnimationState();
             _currentAnimation.Update(gameTime);
+            foreach(var bullet in _bullets)
+            {
+                bullet.Update();
+            }
 
             _wasGrounded = _isGrounded; // Сохраняем состояние для следующего кадра
         }
@@ -191,6 +219,14 @@ namespace BulletJump.GameObjects
         public void Draw()
         {
             _currentAnimation.Draw(Core.SpriteBatch, _playerPosition);
+            if (_bullets != null)
+            {
+                foreach (var bullet in _bullets)
+                {
+                    bullet.Draw();
+                }
+            }
+            
             // DrawDebug(Core.SpriteBatch); // Раскомментируйте для отладки
         }
 
