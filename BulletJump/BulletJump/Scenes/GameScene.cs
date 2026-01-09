@@ -122,6 +122,9 @@ namespace BulletJump.Scenes
                 // 2. Обрабатываем коллизии
                 HandleCollisions();
 
+                // 3. Обрабатываем коллизии пуль
+                HandleBulletCollision();
+
                 // 3. Обновляем камеру
                 if (_camera != null)
                 {
@@ -170,6 +173,78 @@ namespace BulletJump.Scenes
 
             // Стабильно устанавливаем состояние grounded
             _player.SetGrounded(wasGroundedThisFrame);
+        }
+
+        private void HandleBulletCollision()
+        {
+            if (!_isInitialized || _player == null) return;
+
+            // Создаем копию списка для безопасного удаления
+            var bulletsToCheck = _player.GetBullets().ToList();
+
+            foreach (var bullet in bulletsToCheck)
+            {
+                if (bullet.IsExpired) continue;
+
+                // 1. Проверка столкновения со стенами
+                if (CheckBulletTileCollision(bullet))
+                {
+                    bullet.IsExpired = true;
+                    continue;
+                }
+
+                // 2. Проверка выхода за границы уровня (опционально)
+                if (CheckBulletOutOfBounds(bullet))
+                {
+                    bullet.IsExpired = true;
+                }
+
+                // 3. Здесь можно добавить проверку с другими объектами
+                // if (CheckBulletEnemyCollision(bullet)) ...
+            }
+        }
+
+        private bool CheckBulletTileCollision(Bullet bullet)
+        {
+            Rectangle bulletBounds = bullet.GetBounds();
+
+            // Преобразуем границы пули в тайловые координаты
+            Point topLeft = Core.WorldToTile(
+                new Vector2(bulletBounds.Left, bulletBounds.Top),
+                _tilemap.TileWidth, _tilemap.TileHeight);
+
+            Point bottomRight = Core.WorldToTile(
+                new Vector2(bulletBounds.Right, bulletBounds.Bottom),
+                _tilemap.TileWidth, _tilemap.TileHeight);
+
+            // Проверяем все тайлы в прямоугольнике пули
+            for (int x = topLeft.X; x <= bottomRight.X; x++)
+            {
+                for (int y = topLeft.Y; y <= bottomRight.Y; y++)
+                {
+                    if (Core.IsInTilemapBounds(new Point(x, y), _tilemap.Columns, _tilemap.Rows))
+                    {
+                        if (!_tilemap.IsTileEmpty("Collision", x, y))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool CheckBulletOutOfBounds(Bullet bullet)
+        {
+            // Проверяем, вышла ли пуля за границы уровня
+            Rectangle bulletBounds = bullet.GetBounds();
+            Rectangle levelBounds = new Rectangle(
+                0, 0,
+                (int)(_tilemap.Columns * _tilemap.TileWidth),
+                (int)(_tilemap.Rows * _tilemap.TileHeight));
+
+            return !levelBounds.Contains(bulletBounds);
         }
 
         private bool CheckGroundBelow()

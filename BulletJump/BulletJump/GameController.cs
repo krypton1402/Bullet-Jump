@@ -60,8 +60,8 @@ namespace BulletJump
 
         public static bool Shot()
         {
-            return s_keyboard.IsKeyDown(Keys.Space) ||
-                   s_gamePad.IsButtonDown(Buttons.A);
+            return s_keyboard.WasKeyJustPressed(Keys.Space) ||
+                   s_gamePad.WasButtonJustPressed(Buttons.A);
         }
     }
 }
