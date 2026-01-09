@@ -5,6 +5,8 @@ using BulletJumpLibrary.Graphics.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BulletJump.GameObjects
 {
@@ -23,6 +25,7 @@ namespace BulletJump.GameObjects
         private bool _isMoving;
         private bool _isGrounded;
         private bool _wasGrounded; // Для отслеживания предыдущего состояния
+        private bool _isShooting;
         private SpriteEffects _spriteEffects;
 
         // Физика
@@ -35,6 +38,14 @@ namespace BulletJump.GameObjects
         private const int COLLIDER_WIDTH = 42 * 4;
         private const int COLLIDER_HEIGHT = 41 * 4;
         private readonly Rectangle _collider;
+
+        // Стрельба
+        private List<Bullet> _bullets = new List<Bullet>();
+        private const int MAX_BULLETS = 50; // Ограничение количества пуль
+
+        public IReadOnlyList<Bullet> GetBullets() => _bullets;
+
+        public Sprite bulletTexture;
 
         public Player(IAnimationController walkAnimation, IAnimationController jumpAnimation)
         {
@@ -97,6 +108,11 @@ namespace BulletJump.GameObjects
             if (GameController.MoveUp() && _isGrounded)
             {
                 Jump();
+            }
+
+            if (GameController.Shot() && _isGrounded)
+            {
+                Shot();
             }
 
             _isMoving = isMovingNow;
@@ -162,6 +178,20 @@ namespace BulletJump.GameObjects
             }
         }
 
+        private void Shot()
+        {
+            if (_bullets.Count >= MAX_BULLETS) return; // Ограничение
+
+            // Рассчитываем позицию с учетом направления
+            float offsetX = _spriteEffects == SpriteEffects.FlipHorizontally ? -60 : 40;
+            var bullet = new Bullet(
+                bulletTexture,
+                new Vector2(_playerPosition.X + offsetX, _playerPosition.Y - 30),
+                new Vector2(_spriteEffects == SpriteEffects.FlipHorizontally ? -1 : 1, 0));
+
+            _bullets.Add(bullet);
+        }
+
         public void ApplyPhysics()
         {
             // Применяем гравитацию только если не на земле
@@ -184,14 +214,34 @@ namespace BulletJump.GameObjects
             ApplyPhysics();
             UpdateAnimationState();
             _currentAnimation.Update(gameTime);
+            // Обновляем пули с передачей GameTime
+            foreach (var bullet in _bullets)
+            {
+                bullet.Update(gameTime);
+            }
+
+            _wasGrounded = _isGrounded;
+            _bullets.RemoveAll(x => x.IsExpired);
 
             _wasGrounded = _isGrounded; // Сохраняем состояние для следующего кадра
         }
 
+        Rectangle oldBulletBounds;
         public void Draw()
         {
             _currentAnimation.Draw(Core.SpriteBatch, _playerPosition);
+            foreach (var bullet in _bullets)
+            {
+                if (!bullet.IsExpired)
+                    bullet.Draw();
+            }
+
             // DrawDebug(Core.SpriteBatch); // Раскомментируйте для отладки
+        }
+
+        public void ClearBullets()
+        {
+            _bullets.Clear();
         }
 
         public Vector2 GetPosition() => _playerPosition;
@@ -202,6 +252,11 @@ namespace BulletJump.GameObjects
         public PlayerAnimationState AnimationState => _animationState;
         public Vector2 GetColliderOffset() => new Vector2(_collider.X, _collider.Y);
         public Vector2 GetColliderSize() => new Vector2(_collider.Width, _collider.Height);
+
+        public void SetBulletDirection()
+        {
+
+        }
 
         public void SetGrounded(bool grounded)
         {
