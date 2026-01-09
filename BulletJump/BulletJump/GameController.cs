@@ -57,5 +57,11 @@ namespace BulletJump
             return s_keyboard.WasKeyJustPressed(Keys.Enter) ||
                    s_gamePad.WasButtonJustPressed(Buttons.A);
         }
+
+        public static bool Shot()
+        {
+            return s_keyboard.WasKeyJustPressed(Keys.Space) ||
+                   s_gamePad.WasButtonJustPressed(Buttons.A);
+        }
     }
 }

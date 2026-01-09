@@ -28,4 +28,14 @@
 /BulletJump/BulletJumpLibrary/obj/Debug/net8.0/refint
 /BulletJump/BulletJumpLibrary/obj/Debug/net8.0
 *.txt
+/BulletJump/BulletJump/obj/BulletJump.csproj.nuget.g.props
+/BulletJump/BulletJump/obj/BulletJump.csproj.nuget.g.targets
+/BulletJump/BulletJump/obj/Debug/net8.0/BulletJump.assets.cache
 /BulletJump/BulletJump/obj/Debug/net8.0/mgcb.tool.restore
+/BulletJump/BulletJump/obj/project.assets.json
+/BulletJump/BulletJump/obj/project.nuget.cache
+/BulletJump/BulletJumpLibrary/obj/BulletJumpLibrary.csproj.nuget.g.targets
+/BulletJump/BulletJumpLibrary/obj/Debug/net8.0/BulletJumpLibrary.assets.cache
+/BulletJump/BulletJumpLibrary/obj/Debug/net8.0/BulletJumpLibrary.csproj.AssemblyReference.cache
+/BulletJump/BulletJumpLibrary/obj/project.assets.json
+/BulletJump/BulletJumpLibrary/obj/project.nuget.cache
