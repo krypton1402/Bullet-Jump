@@ -121,7 +121,7 @@ namespace BulletJump.Scenes
                 _player.Update(gameTime);
 
                 // 2. Обрабатываем коллизии
-                CollisionManager.HandlePlayerCollision(_player, _tilemap);
+                CollisionManager.HandlePlayerCollision((IPlayerCollidable)_player, _tilemap);
 
                 CollisionManager.HandleBulletCollision(_player.GetBullets().Cast<IBulletCollidable>(), _tilemap);
 
