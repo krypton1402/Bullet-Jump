@@ -1,5 +1,6 @@
 ﻿using BulletJump.Enums;
 using BulletJumpLibrary;
+using BulletJumpLibrary.Collisions;
 using BulletJumpLibrary.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,7 +13,7 @@ using System.Xml.Linq;
 
 namespace BulletJump.GameObjects
 {
-    public class Bullet
+    public class Bullet: IBulletCollidable
     {
         public Vector2 _bulletPosition;
 
@@ -118,6 +119,11 @@ namespace BulletJump.GameObjects
             _sprite.Effects = effects;
 
             _sprite.Draw(Core.SpriteBatch, _bulletPosition);
+        }
+
+        public void SetPosition(Vector2 position)
+        {
+            _bulletPosition = position;
         }
 
     }
