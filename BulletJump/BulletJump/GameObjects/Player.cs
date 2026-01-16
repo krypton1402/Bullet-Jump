@@ -1,5 +1,6 @@
 ﻿using BulletJump.Enums;
 using BulletJumpLibrary;
+using BulletJumpLibrary.Collisions;
 using BulletJumpLibrary.Graphics;
 using BulletJumpLibrary.Graphics.Interfaces;
 using Microsoft.Xna.Framework;
@@ -10,7 +11,7 @@ using System.Linq;
 
 namespace BulletJump.GameObjects
 {
-    public class Player
+    public class Player : IPlayerCollidable
     {
         private Vector2 _playerPosition;
         private Vector2 _velocity;
