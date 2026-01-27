@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BulletJumpLibrary;
 using BulletJump.Scenes;
+using MonoGameGum;
+using Gum.Forms;
+using Gum.Forms.Controls;
 
 namespace BulletJump
 {
@@ -22,7 +25,9 @@ namespace BulletJump
 
             base.Initialize();
 
-            ChangeScene(new GameScene());
+            InitializeGum();
+
+            ChangeScene(new MenuScene());
         }
 
         protected override void LoadContent()
@@ -32,23 +37,35 @@ namespace BulletJump
             // TODO: use this.Content to load your game content here
         }
 
-        //protected override void Update(GameTime gameTime)
-        //{
-        //    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-        //        Exit();
+        private void InitializeGum()
+        {
+            // Инициализируем сервис Gum. Второй параметр определяет
+            // версию используемых по умолчанию визуальных элементов. V2 - это последняя версия
+            GumService.Default.Initialize(this, DefaultVisualsVersion.V2);
 
-        //    // TODO: Add your update logic here
+            // Сообщите сервису Gum, какой контент-менеджер использовать.  Мы расскажем ему
+            // использовать глобальный контент-менеджер из нашего ядра.
+            GumService.Default.ContentLoader.XnaContentManager = Core.Content;
 
-        //    base.Update(gameTime);
-        //}
+            // Register keyboard input for UI control.
+            FrameworkElement.KeyboardsForUiControl.Add(GumService.Default.Keyboard);
 
-        //protected override void Draw(GameTime gameTime)
-        //{
-        //    GraphicsDevice.Clear(Color.CornflowerBlue);
+            // Register gamepad input for Ui control.
+            FrameworkElement.GamePadsForUiControl.AddRange(GumService.Default.Gamepads);
+            // Настройте обратную навигацию по вкладкам пользовательского интерфейса таким образом, чтобы она также запускалась при нажатии на клавиатуру
+            // Клавиша со стрелкой вверх.
+            FrameworkElement.TabReverseKeyCombos.Add(
+                new KeyCombo() { PushedKey = Microsoft.Xna.Framework.Input.Keys.Up });
 
-        //    // TODO: Add your drawing code here
+            FrameworkElement.TabKeyCombos.Add(
+                new KeyCombo() { PushedKey = Microsoft.Xna.Framework.Input.Keys.Down });
 
-        //    base.Draw(gameTime);
-        //}
+            // Ресурсы, созданные для пользовательского интерфейса, были увеличены на 1/4 размера,
+            // чтобы сохранить размер атласа текстур небольшим.Итак, мы установим размер холста по умолчанию равным 1 / 4 размера
+            // разрешения игры, а затем попросим gum увеличить масштаб в 4 раза.
+            GumService.Default.CanvasWidth = GraphicsDevice.PresentationParameters.BackBufferWidth / 4.0f;
+            GumService.Default.CanvasHeight = GraphicsDevice.PresentationParameters.BackBufferHeight / 4.0f;
+            GumService.Default.Renderer.Camera.Zoom = 4.0f;
+        }
     }
 }
