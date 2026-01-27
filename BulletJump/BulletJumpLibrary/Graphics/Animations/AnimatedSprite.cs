@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BulletJumpLibrary.Graphics
+namespace BulletJumpLibrary.Graphics.Animations
 {
     public class AnimatedSprite : Sprite
     {
