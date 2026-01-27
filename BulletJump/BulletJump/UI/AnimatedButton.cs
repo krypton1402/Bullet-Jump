@@ -1,4 +1,5 @@
 ﻿using BulletJumpLibrary.Graphics;
+using BulletJumpLibrary.Graphics.Animations;
 using Gum.DataTypes.Variables;
 using Gum.Forms.Controls;
 using Gum.Forms.DefaultVisuals;
