@@ -8,10 +8,6 @@ using Gum.Managers;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum.GueDeriving;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BulletJump.UI
 {
@@ -44,36 +40,32 @@ namespace BulletJump.UI
             textInstance.WidthUnits = Gum.DataTypes.DimensionUnitType.RelativeToChildren;
 
             TextureRegion unfocusedTextureRegion = atlas.GetRegion("unfocused-button");
-            AnimationChain unfocusedAnimation = new AnimationChain();
-            unfocusedAnimation.Name = nameof(unfocusedAnimation);
-            AnimationFrame unfocusedFrame = new AnimationFrame
-            {
-                TopCoordinate = unfocusedTextureRegion.TopTextureCoordinate,
-                BottomCoordinate = unfocusedTextureRegion.BottomTextureCoordinate,
-                LeftCoordinate = unfocusedTextureRegion.LeftTextureCoordinate,
-                RightCoordinate = unfocusedTextureRegion.RightTextureCoordinate,
-                FrameLength = 0.3f,
-                Texture = unfocusedTextureRegion.Texture,
-            };
-            unfocusedAnimation.Add(unfocusedFrame);
+            AnimationChain unfocusedAnimation = atlas.CreateSingleFrameChain(
+                "unfocused-button",
+                "Unfocused",
+                0.3f);
 
-            Animation focusedAtlasAnimation = atlas.GetAnimation("focused-button-animation");
+            AnimationChain focusedAtlasAnimationChain = atlas.GetAnimationChain("focused-button-animation");
 
             AnimationChain focusedAnimation = new AnimationChain();
-            focusedAnimation.Name = nameof(focusedAnimation);
-            foreach (TextureRegion region in focusedAtlasAnimation.Frames)
-            {
-                AnimationFrame frame = new AnimationFrame
-                {
-                    TopCoordinate = region.TopTextureCoordinate,
-                    BottomCoordinate = region.BottomTextureCoordinate,
-                    LeftCoordinate = region.LeftTextureCoordinate,
-                    RightCoordinate = region.RightTextureCoordinate,
-                    FrameLength = (float)focusedAtlasAnimation.Delay.TotalSeconds,
-                    Texture = region.Texture
-                };
+            focusedAnimation.Name = "Focused";
 
-                focusedAnimation.Add(frame);
+            if (focusedAtlasAnimationChain != null)
+            {
+                // Копируем каждый кадр из исходной анимации
+                foreach (AnimationFrame frameInAtlas in focusedAtlasAnimationChain)
+                {
+                    AnimationFrame frame = new AnimationFrame
+                    {
+                        TopCoordinate = frameInAtlas.TopCoordinate,
+                        BottomCoordinate = frameInAtlas.BottomCoordinate,
+                        LeftCoordinate = frameInAtlas.LeftCoordinate,
+                        RightCoordinate = frameInAtlas.RightCoordinate,
+                        FrameLength = frameInAtlas.FrameLength,
+                        Texture = frameInAtlas.Texture
+                    };
+                    focusedAnimation.Add(frame);
+                }
             }
 
             background.AnimationChains = new AnimationChainList

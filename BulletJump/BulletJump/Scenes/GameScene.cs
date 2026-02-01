@@ -2,19 +2,13 @@
 using BulletJumpLibrary;
 using BulletJumpLibrary.Collisions;
 using BulletJumpLibrary.Graphics;
-using BulletJumpLibrary.Graphics.Animations;
-using BulletJumpLibrary.Graphics.Interfaces;
 using BulletJumpLibrary.Scenes;
 using Gum.Graphics.Animation;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace BulletJump.Scenes
 {
@@ -95,12 +89,14 @@ namespace BulletJump.Scenes
                     _tilemap.GetLayer("Collision").IsVisible = false;
                 }
 
-                // Создаем игрока с новой системой анимаций
+                // Загружаем TextureAtlas для игрока
                 TextureAtlas playerAtlas = TextureAtlas.FromFile(Core.Content, "images/player-atlas-definition.xml");
+
+                // Создаем спрайт для пули
                 Sprite bullet = playerAtlas.CreateSprite("bullet-1");
                 bullet.Scale = new Vector2(4.0f, 4.0f);
 
-                // Создаем AnimationChain для каждой анимации
+                // Создаем AnimationChainList для игрока
                 var animationChains = CreatePlayerAnimationChains(playerAtlas);
 
                 // Создаем игрока с AnimationChainList
@@ -117,43 +113,14 @@ namespace BulletJump.Scenes
 
         private AnimationChainList CreatePlayerAnimationChains(TextureAtlas atlas)
         {
-            var animationChains = new AnimationChainList();
-
-            // Создаем AnimationChain для ходьбы
-            var walkAnimation = atlas.GetAnimation("player-animation");
-            var walkChain = CreateAnimationChainFromAtlasAnimation(walkAnimation, "Walk");
-            animationChains.Add(walkChain);
-
-            // Создаем AnimationChain для прыжка
-            var jumpAnimation = atlas.GetAnimation("player-jump-animation");
-            var jumpChain = CreateAnimationChainFromAtlasAnimation(jumpAnimation, "Jump");
-            animationChains.Add(jumpChain);
-
-            return animationChains;
-        }
-
-        private AnimationChain CreateAnimationChainFromAtlasAnimation(Animation atlasAnimation, string chainName)
-        {
-            var chain = new AnimationChain
+            var animationMappings = new Dictionary<string, string>
             {
-                Name = chainName
+                { "player-animation", "Walk" },
+                { "player-jump-animation", "Jump" }
             };
 
-            foreach (var region in atlasAnimation.Frames)
-            {
-                var frame = new AnimationFrame
-                {
-                    TopCoordinate = region.TopTextureCoordinate,
-                    BottomCoordinate = region.BottomTextureCoordinate,
-                    LeftCoordinate = region.LeftTextureCoordinate,
-                    RightCoordinate = region.RightTextureCoordinate,
-                    FrameLength = (float)atlasAnimation.Delay.TotalSeconds,
-                    Texture = region.Texture
-                };
-                chain.Add(frame);
-            }
-
-            return chain;
+            // Используем новый метод из TextureAtlas
+            return atlas.CreateAnimationChainList(animationMappings);
         }
 
         public override void Update(GameTime gameTime)
