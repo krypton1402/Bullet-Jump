@@ -63,9 +63,9 @@ namespace BulletJump
             // Ресурсы, созданные для пользовательского интерфейса, были увеличены на 1/4 размера,
             // чтобы сохранить размер атласа текстур небольшим.Итак, мы установим размер холста по умолчанию равным 1 / 4 размера
             // разрешения игры, а затем попросим gum увеличить масштаб в 4 раза.
-            GumService.Default.CanvasWidth = GraphicsDevice.PresentationParameters.BackBufferWidth / 4.0f;
-            GumService.Default.CanvasHeight = GraphicsDevice.PresentationParameters.BackBufferHeight / 4.0f;
-            GumService.Default.Renderer.Camera.Zoom = 4.0f;
+            GumService.Default.CanvasWidth = 1280;
+            GumService.Default.CanvasHeight = 720;
+            GumService.Default.Renderer.Camera.Zoom = 1.0f;
         }
     }
 }

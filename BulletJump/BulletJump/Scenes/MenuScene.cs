@@ -13,6 +13,7 @@ using BulletJumpLibrary.Graphics;
 using BulletJumpLibrary;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum.GueDeriving;
+using BulletJump.UI;
 
 namespace BulletJump.Scenes
 {
@@ -56,8 +57,8 @@ namespace BulletJump.Scenes
 
         private Panel _titleScreenButtonsPanel;
         private Panel _optionsPanel;
-        private Button _optionsButton; // Замени на анимированные
-        private Button _optionsBackButton;// Замени на анимированные
+        private AnimatedButton _optionsButton;
+        private AnimatedButton _optionsBackButton;
 
         private TextureAtlas _textureAtlas;
 
@@ -83,7 +84,7 @@ namespace BulletJump.Scenes
             _font = Core.Content.Load<SpriteFont>("fonts/drukwidecyr-bold");
             _font5x = Core.Content.Load<SpriteFont>("fonts/drukwidecyr-bold_5x");
 
-            // _atlas = TextureAtlas.FromFile(Core.Content, "images/enviroment-atlas-definition");
+            _textureAtlas = TextureAtlas.FromFile(Core.Content, "images/UI/menu-atlas-definition-1.xml");
         }
 
         public override void Update(GameTime gameTime)
@@ -150,30 +151,31 @@ namespace BulletJump.Scenes
             var buttonContainer = new Panel();
             buttonContainer.Anchor(Gum.Wireframe.Anchor.Center);
             buttonContainer.Width = 150; // Ширина контейнера для кнопок
-            buttonContainer.Height = 120; // Высота контейнера для кнопок
-            buttonContainer.Y = 100;
+            buttonContainer.Height = 0; // Высота контейнера для кнопок
+            buttonContainer.Y = 150;
             buttonContainer.Visual.ChildrenLayout = Gum.Managers.ChildrenLayout.TopToBottomStack;
             buttonContainer.Visual.StackSpacing = 20; // Расстояние между кнопками
             _titleScreenButtonsPanel.AddChild(buttonContainer);
 
-            var startButton = new Button();
-            //buttonContainer.Anchor(Gum.Wireframe.Anchor.Left);
+            AnimatedButton startButton = new AnimatedButton(_textureAtlas, 0.5f);
+            // buttonContainer.Anchor(Gum.Wireframe.Anchor.Left);
             startButton.X = 150;
             //startButton.Y = -120;
-            startButton.Width = 70;
-            startButton.Height = 0.5f;
-            startButton.Text = "Start";
+            startButton.Visual.Height = 70;
+            startButton.Visual.Width = 128;
+            startButton.Text = "Новая игра";
             startButton.Click += HandleStartClicked;
 
             buttonContainer.AddChild(startButton);
 
-            _optionsButton = new Button();
+            _optionsButton = new AnimatedButton(_textureAtlas, 0.5f);
             //_optionsButton.Anchor(Gum.Wireframe.Anchor.Right);
             _optionsButton.X = 150;
             //_optionsButton.Y = -120;
-            _optionsButton.Height = 0.5f;
-            _optionsButton.Width = 70;
-            _optionsButton.Text = "Options";
+            _optionsButton.Visual.Height = 70;
+            _optionsButton.Visual.Width = 128;
+
+            _optionsButton.Text = "НАСТРОЙКИ";
             _optionsButton.Click += HandleOptionsClicked;
             buttonContainer.AddChild(_optionsButton);
             startButton.IsFocused = true;
@@ -212,7 +214,7 @@ namespace BulletJump.Scenes
             optionsText.Text = "OPTIONS";
             optionsText.UseCustomFont = true;
             optionsText.FontScale = 0.5f;
-            optionsText.CustomFontFile = @"fonts/04b_30.fnt";
+            optionsText.CustomFontFile = @"fonts/drukwidecyr-bold.fnt";
             _optionsPanel.AddChild(optionsText);
 
             Slider musicSlider = new Slider();
@@ -243,7 +245,7 @@ namespace BulletJump.Scenes
             sfxSlider.ValueChangeCompleted += HandleSfxSliderChangeCompleted;
             _optionsPanel.AddChild(sfxSlider);
 
-            _optionsBackButton = new Button();
+            _optionsBackButton = new AnimatedButton(_textureAtlas, 0.5f);
             _optionsBackButton.Text = "BACK";
             _optionsBackButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
             _optionsBackButton.X = -28f;

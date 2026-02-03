@@ -13,14 +13,15 @@ namespace BulletJump.UI
 {
     internal class AnimatedButton : Button
     {
-        public AnimatedButton(TextureAtlas atlas)
+        public AnimatedButton(TextureAtlas atlas, float scale)
         {
             ButtonVisual buttonVisual = (ButtonVisual)Visual;
 
-            buttonVisual.Height = 14f;
+            buttonVisual.Height = 87f;
             buttonVisual.HeightUnits = Gum.DataTypes.DimensionUnitType.Absolute;
-            buttonVisual.Width = 21f;
+            buttonVisual.Width = 516f;
             buttonVisual.WidthUnits = Gum.DataTypes.DimensionUnitType.RelativeToChildren;
+
 
             NineSliceRuntime background = buttonVisual.Background;
             background.Texture = atlas.Texture;
@@ -28,13 +29,14 @@ namespace BulletJump.UI
             background.Color = Microsoft.Xna.Framework.Color.White;
 
             TextRuntime textInstance = buttonVisual.TextInstance;
-            textInstance.Text = "Новая игра";
-            textInstance.Blue = 130;
-            textInstance.Green = 86;
+            textInstance.Text = "New Game";
+            textInstance.Blue = 255;
+            textInstance.Green = 255;
             textInstance.Red = 70;
             textInstance.UseCustomFont = true;
-            textInstance.CustomFontFile = @"fonts/drukwidecyr-bold.ttf";
-            textInstance.FontScale = 0.25f;
+            // textInstance.Font = "Arial";
+            textInstance.CustomFontFile = @"fonts/drukwidecyr-bold.fnt";
+            textInstance.FontSize = 64;
             textInstance.Anchor(Gum.Wireframe.Anchor.Center);
             textInstance.Width = 0;
             textInstance.WidthUnits = Gum.DataTypes.DimensionUnitType.RelativeToChildren;
