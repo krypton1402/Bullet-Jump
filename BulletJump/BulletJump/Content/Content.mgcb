@@ -13,6 +13,26 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin fonts/drukwidecyr-bold_0.png
+/copy:fonts/drukwidecyr-bold_0.png
+
+#begin fonts/drukwidecyr-bold_5x.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:fonts/drukwidecyr-bold_5x.spritefont
+
+#begin fonts/drukwidecyr-bold.fnt
+/copy:fonts/drukwidecyr-bold.fnt
+
+#begin fonts/drukwidecyr-bold.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:fonts/drukwidecyr-bold.spritefont
+
 #begin images/enviroment-atlas-definition.xml
 /copy:images/enviroment-atlas-definition.xml
 
@@ -45,4 +65,28 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:images/player-atlas.png
+
+#begin images/UI/menu-atlas-1.png
+/copy:images/UI/menu-atlas-1.png
+
+#begin images/UI/menu-atlas-2.png
+/copy:images/UI/menu-atlas-2.png
+
+#begin images/UI/menu-atlas-definition-1.xml
+/copy:images/UI/menu-atlas-definition-1.xml
+
+#begin images/UI/menu-atlas-definition.xml
+/copy:images/UI/menu-atlas-definition.xml
+
+#begin images/UI/menu-atlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:images/UI/menu-atlas.png
 
