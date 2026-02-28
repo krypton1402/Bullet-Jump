@@ -55,8 +55,10 @@ namespace BulletJump.Scenes
 
         private float _scrollSpeed = 50.0f;
 
-        private Panel _titleScreenButtonsPanel;
-        private Panel _optionsPanel;
+        private Vector2 _backgroundOffset;
+
+        private StackPanel _titleScreenButtonsPanel;
+        private StackPanel _optionsPanel;
         private AnimatedButton _optionsButton;
         private AnimatedButton _optionsBackButton;
 
@@ -75,6 +77,7 @@ namespace BulletJump.Scenes
             _jumpTextOrigin = size * 0.5f;
 
             _backgroundDestination = Core.GraphicsDevice.PresentationParameters.Bounds;
+            _backgroundOffset = Vector2.Zero;
 
             InitializeUI();
         }
@@ -83,6 +86,7 @@ namespace BulletJump.Scenes
         {
             _font = Core.Content.Load<SpriteFont>("fonts/drukwidecyr-bold");
             _font5x = Core.Content.Load<SpriteFont>("fonts/drukwidecyr-bold_5x");
+            _backgrounPattern = Content.Load<Texture2D>("images/CITY(WIP)");
 
             _textureAtlas = TextureAtlas.FromFile(Core.Content, "images/UI/menu-atlas-definition-1.xml");
         }
@@ -97,12 +101,12 @@ namespace BulletJump.Scenes
             // Измените смещения для обтекания фонового рисунка, чтобы он
             // прокручивался вниз и вправо.
 
-            //float offset = _scrollSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            //_backgroundOffset.X -= offset;
+            float offset = _scrollSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _backgroundOffset.X -= offset;
             //_backgroundOffset.Y -= offset;
-            //// Убедитесь, что смещения не выходят за границы текстуры, чтобы получилась
-            //// бесшовная обертка.
-            //_backgroundOffset.X %= _backgrounPattern.Width;
+            // Убедитесь, что смещения не выходят за границы текстуры, чтобы получилась
+            // бесшовная обертка.
+            _backgroundOffset.X %= _backgrounPattern.Width;
             //_backgroundOffset.Y %= _backgrounPattern.Height;
 
             GumService.Default.Update(gameTime);
@@ -112,9 +116,9 @@ namespace BulletJump.Scenes
         {
             Core.GraphicsDevice.Clear(new Color(32, 40, 78, 255));
 
-            //Core.SpriteBatch.Begin(samplerState: SamplerState.PointWrap);
-            //Core.SpriteBatch.Draw(_backgrounPattern, _backgroundDestination, new Rectangle(_backgroundOffset.ToPoint(), _backgroundDestination.Size), Color.White * 0.5f);
-            //Core.SpriteBatch.End();
+            Core.SpriteBatch.Begin(samplerState: SamplerState.PointWrap);
+            Core.SpriteBatch.Draw(_backgrounPattern, _backgroundDestination, new Rectangle(_backgroundOffset.ToPoint(), _backgroundDestination.Size), Color.White * 0.5f);
+            Core.SpriteBatch.End();
 
             if (_titleScreenButtonsPanel.IsVisible)
             {
@@ -144,40 +148,57 @@ namespace BulletJump.Scenes
         {
 
             // Create a container to hold all of our buttons
-            _titleScreenButtonsPanel = new Panel();
-            _titleScreenButtonsPanel.Dock(Gum.Wireframe.Dock.Fill);
+            _titleScreenButtonsPanel = new StackPanel();
+            _titleScreenButtonsPanel.Anchor(Gum.Wireframe.Anchor.Bottom);
+            _titleScreenButtonsPanel.Y = -150;
+            _titleScreenButtonsPanel.X = 150;
+            // _titleScreenButtonsPanel.Visual.ChildrenLayout = Gum.Managers.ChildrenLayout.TopToBottomStack;
+            _titleScreenButtonsPanel.Visual.StackSpacing = 10;
+            _titleScreenButtonsPanel.XOrigin = RenderingLibrary.Graphics.HorizontalAlignment.Center;
+            _titleScreenButtonsPanel.YOrigin = RenderingLibrary.Graphics.VerticalAlignment.Center;
+
+
             _titleScreenButtonsPanel.AddToRoot();
 
-            var buttonContainer = new Panel();
-            buttonContainer.Anchor(Gum.Wireframe.Anchor.Center);
-            buttonContainer.Width = 150; // Ширина контейнера для кнопок
-            buttonContainer.Height = 0; // Высота контейнера для кнопок
-            buttonContainer.Y = 150;
-            buttonContainer.Visual.ChildrenLayout = Gum.Managers.ChildrenLayout.TopToBottomStack;
-            buttonContainer.Visual.StackSpacing = 20; // Расстояние между кнопками
-            _titleScreenButtonsPanel.AddChild(buttonContainer);
+            //var background = new ColoredRectangleRuntime();
+            //background.Color = new Microsoft.Xna.Framework.Color(0, 0, 0, 128);
+            //background.Width = _titleScreenButtonsPanel.Width;
+            //background.Height = 200; // Высота фона
+            //                         // Устанавливаем, чтобы фон растягивался по ширине родителя
+            //background.WidthUnits = Gum.DataTypes.DimensionUnitType.RelativeToParent;
+            //background.HeightUnits = Gum.DataTypes.DimensionUnitType.Absolute;
+            //background.X = 0;
+            //background.Y = 0;
+            //// Важно: добавить фон первым, чтобы он был внизу
+            //_titleScreenButtonsPanel.AddChild(background);
+            //_titleScreenButtonsPanel.Visual.
 
-            AnimatedButton startButton = new AnimatedButton(_textureAtlas, 0.5f);
+            //var buttonContainer = new Panel();
+            //buttonContainer.Anchor(Gum.Wireframe.Anchor.Center);
+            //buttonContainer.Width = 150; // Ширина контейнера для кнопок
+            //buttonContainer.Height = 0; // Высота контейнера для кнопок
+            //buttonContainer.Y = 150;
+            //buttonContainer.Visual.ChildrenLayout = Gum.Managers.ChildrenLayout.TopToBottomStack;
+            //buttonContainer.Visual.StackSpacing = 20; // Расстояние между кнопками
+            //_titleScreenButtonsPanel.AddChild(buttonContainer);
+
+            AnimatedButton startButton = new AnimatedButton(_textureAtlas);
             // buttonContainer.Anchor(Gum.Wireframe.Anchor.Left);
-            startButton.X = 150;
+            //startButton.X = 150;
             //startButton.Y = -120;
-            startButton.Visual.Height = 70;
-            startButton.Visual.Width = 128;
             startButton.Text = "Новая игра";
             startButton.Click += HandleStartClicked;
+            //startButton.
 
-            buttonContainer.AddChild(startButton);
+            _titleScreenButtonsPanel.AddChild(startButton);
 
-            _optionsButton = new AnimatedButton(_textureAtlas, 0.5f);
+            _optionsButton = new AnimatedButton(_textureAtlas);
             //_optionsButton.Anchor(Gum.Wireframe.Anchor.Right);
-            _optionsButton.X = 150;
+            //_optionsButton.X = 150;
             //_optionsButton.Y = -120;
-            _optionsButton.Visual.Height = 70;
-            _optionsButton.Visual.Width = 128;
-
             _optionsButton.Text = "НАСТРОЙКИ";
             _optionsButton.Click += HandleOptionsClicked;
-            buttonContainer.AddChild(_optionsButton);
+            _titleScreenButtonsPanel.AddChild(_optionsButton);
             startButton.IsFocused = true;
         }
 
@@ -203,7 +224,7 @@ namespace BulletJump.Scenes
 
         private void CreateOptionsPanel()
         {
-            _optionsPanel = new Panel();
+            _optionsPanel = new StackPanel();
             _optionsPanel.Dock(Gum.Wireframe.Dock.Fill);
             _optionsPanel.IsVisible = false;
             _optionsPanel.AddToRoot();
@@ -245,7 +266,7 @@ namespace BulletJump.Scenes
             sfxSlider.ValueChangeCompleted += HandleSfxSliderChangeCompleted;
             _optionsPanel.AddChild(sfxSlider);
 
-            _optionsBackButton = new AnimatedButton(_textureAtlas, 0.5f);
+            _optionsBackButton = new AnimatedButton(_textureAtlas);
             _optionsBackButton.Text = "BACK";
             _optionsBackButton.Anchor(Gum.Wireframe.Anchor.BottomRight);
             _optionsBackButton.X = -28f;

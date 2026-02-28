@@ -33,6 +33,18 @@
 /processorParam:TextureFormat=Compressed
 /build:fonts/drukwidecyr-bold.spritefont
 
+#begin images/CITY(WIP).jpeg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:images/CITY(WIP).jpeg
+
 #begin images/enviroment-atlas-definition.xml
 /copy:images/enviroment-atlas-definition.xml
 
@@ -71,6 +83,9 @@
 
 #begin images/UI/menu-atlas-2.png
 /copy:images/UI/menu-atlas-2.png
+
+#begin images/UI/menu-atlas-3.png
+/copy:images/UI/menu-atlas-3.png
 
 #begin images/UI/menu-atlas-definition-1.xml
 /copy:images/UI/menu-atlas-definition-1.xml

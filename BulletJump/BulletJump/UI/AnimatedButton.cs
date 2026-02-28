@@ -13,14 +13,15 @@ namespace BulletJump.UI
 {
     internal class AnimatedButton : Button
     {
-        public AnimatedButton(TextureAtlas atlas, float scale)
+        public AnimatedButton(TextureAtlas atlas)
         {
             ButtonVisual buttonVisual = (ButtonVisual)Visual;
 
             buttonVisual.Height = 87f;
             buttonVisual.HeightUnits = Gum.DataTypes.DimensionUnitType.Absolute;
             buttonVisual.Width = 516f;
-            buttonVisual.WidthUnits = Gum.DataTypes.DimensionUnitType.RelativeToChildren;
+            buttonVisual.WidthUnits = Gum.DataTypes.DimensionUnitType.Absolute;
+            buttonVisual.XOrigin = RenderingLibrary.Graphics.HorizontalAlignment.Center;
 
 
             NineSliceRuntime background = buttonVisual.Background;
