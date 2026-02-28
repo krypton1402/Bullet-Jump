@@ -9,13 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml;
+using BulletJumpLibrary.Graphics.Animations;
+using Gum.Graphics.Animation;
 
 namespace BulletJumpLibrary.Graphics
 {
     public class TextureAtlas
     {
         // Stores animations added to this atlas.
-        private Dictionary<string, Animation> _animations;
+        private Dictionary<string, AnimationChain> _animationChains;
 
         private Dictionary<string, TextureRegion> _regions;
 
@@ -27,7 +29,7 @@ namespace BulletJumpLibrary.Graphics
         public TextureAtlas()
         {
             _regions = new Dictionary<string, TextureRegion>();
-            _animations = new Dictionary<string, Animation>();
+            _animationChains = new Dictionary<string, AnimationChain>();
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace BulletJumpLibrary.Graphics
         {
             Texture = texture;
             _regions = new Dictionary<string, TextureRegion>();
-            _animations = new Dictionary<string, Animation>();
+            _animationChains = new Dictionary<string, AnimationChain>();
         }
 
         /// <summary>
@@ -158,9 +160,10 @@ namespace BulletJumpLibrary.Graphics
                         {
                             string name = animationElement.Attribute("name")?.Value;
                             float delayInMilliseconds = float.Parse(animationElement.Attribute("delay")?.Value ?? "0");
-                            TimeSpan delay = TimeSpan.FromMilliseconds(delayInMilliseconds);
 
-                            List<TextureRegion> frames = new List<TextureRegion>();
+                            float frameLength = delayInMilliseconds / 1000.0f; // Конвертируем в секунды
+
+                            var chain = new AnimationChain { Name = name };
 
                             var frameElements = animationElement.Elements("Frame");
 
@@ -170,12 +173,20 @@ namespace BulletJumpLibrary.Graphics
                                 {
                                     string regionName = frameElement.Attribute("region").Value;
                                     TextureRegion region = atlas.GetRegion(regionName);
-                                    frames.Add(region);
+                                    var frame = new AnimationFrame
+                                    {
+                                        TopCoordinate = region.TopTextureCoordinate,
+                                        BottomCoordinate = region.BottomTextureCoordinate,
+                                        LeftCoordinate = region.LeftTextureCoordinate,
+                                        RightCoordinate = region.RightTextureCoordinate,
+                                        FrameLength = frameLength,
+                                        Texture = region.Texture
+                                    };
+                                    chain.Add(frame);
                                 }
                             }
 
-                            Animation animation = new Animation(frames, delay);
-                            atlas.AddAnimation(name, animation);
+                            atlas.AddAnimationChain(name, chain);
                         }
                     }
 
@@ -195,45 +206,66 @@ namespace BulletJumpLibrary.Graphics
             return new Sprite(region);
         }
 
-        /// <summary>
-        /// Adds the given animation to this texture atlas with the specified name.
-        /// </summary>
-        /// <param name="animationName">The name of the animation to add.</param>
-        /// <param name="animation">The animation to add.</param>
-        public void AddAnimation(string animationName, Animation animation)
+        public void AddAnimationChain(string name, AnimationChain chain)
         {
-            _animations.Add(animationName, animation);
+            _animationChains.Add(name, chain);
+        }
+
+        public AnimationChain GetAnimationChain(string name)
+        {
+            return _animationChains[name];
         }
 
         /// <summary>
-        /// Gets the animation from this texture atlas with the specified name.
+        /// Creates an AnimationChainList from animation name mappings
         /// </summary>
-        /// <param name="animationName">The name of the animation to retrieve.</param>
-        /// <returns>The animation with the specified name.</returns>
-        public Animation GetAnimation(string animationName)
+        public AnimationChainList CreateAnimationChainList(Dictionary<string, string> animationMappings)
         {
-            return _animations[animationName];
+            var chainList = new AnimationChainList();
+
+            foreach (var mapping in animationMappings)
+            {
+                var animationName = mapping.Key;
+                var chainName = mapping.Value;
+
+                var chain = GetAnimationChain(animationName);
+                if (chain != null)
+                {
+                    // Создаем копию с новым именем
+                    var newChain = new AnimationChain { Name = chainName };
+                    foreach (var frame in chain)
+                    {
+                        newChain.Add(frame);
+                    }
+                    chainList.Add(newChain);
+                }
+            }
+
+            return chainList;
         }
 
         /// <summary>
-        /// Removes the animation with the specified name from this texture atlas.
+        /// Creates a single-frame AnimationChain from a region
         /// </summary>
-        /// <param name="animationName">The name of the animation to remove.</param>
-        /// <returns>true if the animation is removed successfully; otherwise, false.</returns>
-        public bool RemoveAnimation(string animationName)
+        public AnimationChain CreateSingleFrameChain(string regionName, string chainName, float frameLength = 0.1f)
         {
-            return _animations.Remove(animationName);
-        }
+            var region = GetRegion(regionName);
+            if (region == null)
+                return null;
 
-        /// <summary>
-        /// Creates a new animated sprite using the animation from this texture atlas with the specified name.
-        /// </summary>
-        /// <param name="animationName">The name of the animation to use.</param>
-        /// <returns>A new AnimatedSprite using the animation with the specified name.</returns>
-        public AnimatedSprite CreateAnimatedSprite(string animationName)
-        {
-            Animation animation = GetAnimation(animationName);
-            return new AnimatedSprite(animation);
+            var chain = new AnimationChain { Name = chainName };
+            var frame = new AnimationFrame
+            {
+                TopCoordinate = region.TopTextureCoordinate,
+                BottomCoordinate = region.BottomTextureCoordinate,
+                LeftCoordinate = region.LeftTextureCoordinate,
+                RightCoordinate = region.RightTextureCoordinate,
+                FrameLength = frameLength,
+                Texture = region.Texture
+            };
+            chain.Add(frame);
+
+            return chain;
         }
     }
 }

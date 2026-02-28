@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas>
+	<Texture>images/UI/menu-atlas</Texture>
+	<Regions>
+		<Region name="unfocused-button" x="0" y="3" width="128" height="33" />
+		<Region name="focused-button-1" x="0" y="45" width="128" height="33" />
+		<Region name="focused-button-2" x="0" y="89" width="128" height="33" />
+	</Regions>
+	<Animations>
+		<Animation name="focused-button-animation" delay="300">
+            <Frame region="focused-button-1" />
+            <Frame region="focused-button-2" />
+        </Animation>
+	</Animations>
+</TextureAtlas>

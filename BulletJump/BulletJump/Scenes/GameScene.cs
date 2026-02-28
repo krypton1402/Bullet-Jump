@@ -2,17 +2,13 @@
 using BulletJumpLibrary;
 using BulletJumpLibrary.Collisions;
 using BulletJumpLibrary.Graphics;
-using BulletJumpLibrary.Graphics.Interfaces;
 using BulletJumpLibrary.Scenes;
+using Gum.Graphics.Animation;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace BulletJump.Scenes
 {
@@ -49,12 +45,23 @@ namespace BulletJump.Scenes
                 int tileX = 7;
                 int tileY = _tilemap.Rows - 10;
 
-                playerPos.X = tileX * _tilemap.TileWidth + (_tilemap.TileWidth - _player.GetBounds().Width) / 2;
-                playerPos.Y = tileY * _tilemap.TileHeight - _player.GetBounds().Height + _tilemap.TileHeight;
+                // ВАЖНО: Используем центр коллайдера для позиционирования
+                // Коллайдер имеет смещение (_collider.X, _collider.Y), которое равно (-ширина/2, -высота/2)
+                // Поэтому позиция игрока (центр коллайдера) должна быть в середине тайла
+
+                playerPos.X = tileX * _tilemap.TileWidth + _tilemap.TileWidth / 2;
+
+                // Ставим игрока так, чтобы нижняя граница коллайдера была на верхней границе тайла
+                // Коллайдер центрирован, поэтому его нижняя граница: playerPos.Y + _collider.Y + _collider.Height
+                // Мы хотим, чтобы эта граница была на уровне: (tileY + 1) * _tilemap.TileHeight
+
+                float bottomOfCollider = (tileY + 1) * _tilemap.TileHeight;
+                float colliderBottomOffset = _player.GetColliderOffset().Y + _player.GetColliderSize().Y;
+                playerPos.Y = bottomOfCollider - colliderBottomOffset;
 
                 _player.Initialize(playerPos, 300);
 
-                // Создаем и настраиваем камеру ПОСЛЕ создания игрока и тайлмапа
+                // Настраиваем камеру
                 _camera = new Camera(Core.GraphicsDevice.Viewport);
                 _camera.Smoothness = 0.1f;
                 _camera.SetBoundsFromTilemap(_tilemap);
@@ -77,40 +84,43 @@ namespace BulletJump.Scenes
                 _tilemap = Tilemap.FromFile(Content, "images/level1-enviroment-atlas-definition.xml");
                 _tilemap.Scale = new Vector2(5.0f, 5.0f);
 
-                // Настраиваем видимость слоев
                 if (_tilemap.Layers.ContainsKey("Collision"))
                 {
                     _tilemap.GetLayer("Collision").IsVisible = false;
                 }
 
-                // Создаем игрока
+                // Загружаем TextureAtlas для игрока
                 TextureAtlas playerAtlas = TextureAtlas.FromFile(Core.Content, "images/player-atlas-definition.xml");
 
-                AnimatedSprite playerWalkAnimation = playerAtlas.CreateAnimatedSprite("player-animation");
-                AnimatedSprite playerJumpAnimation = playerAtlas.CreateAnimatedSprite("player-jump-animation");
+                // Создаем спрайт для пули
                 Sprite bullet = playerAtlas.CreateSprite("bullet-1");
                 bullet.Scale = new Vector2(4.0f, 4.0f);
 
-                playerWalkAnimation.Scale = new Vector2(4.0f, 4.0f);
-                playerJumpAnimation.Scale = new Vector2(4.0f, 4.0f);
+                // Создаем AnimationChainList для игрока
+                var animationChains = CreatePlayerAnimationChains(playerAtlas);
 
-                // УСТАНАВЛИВАЕМ ORIGIN В ЦЕНТРЕ ДЛЯ ОБЕИХ АНИМАЦИЙ
-                playerWalkAnimation.CenterOrigin();
-                playerJumpAnimation.CenterOrigin();
-
-                IAnimationController walkAnimation = new AnimationController(playerWalkAnimation);
-                IAnimationController jumpAnimation = new AnimationController(playerJumpAnimation);
-
-                _player = new Player(walkAnimation, jumpAnimation);
+                // Создаем игрока с AnimationChainList
+                _player = new Player(animationChains);
                 _player.bulletTexture = bullet;
 
-                // Инициализируем игру ПОСЛЕ загрузки всего контента
                 InitializeNewGame();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in LoadContent: {ex.Message}");
             }
+        }
+
+        private AnimationChainList CreatePlayerAnimationChains(TextureAtlas atlas)
+        {
+            var animationMappings = new Dictionary<string, string>
+            {
+                { "player-animation", "Walk" },
+                { "player-jump-animation", "Jump" }
+            };
+
+            // Используем новый метод из TextureAtlas
+            return atlas.CreateAnimationChainList(animationMappings);
         }
 
         public override void Update(GameTime gameTime)
